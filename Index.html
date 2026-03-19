@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WATER BIRDS LTD | ERP SYSTEM</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root { --sidebar-width: 240px; --primary-color: #2563eb; --bg-body: #f8fafc; --text-main: #1e293b; --text-muted: #64748b; --white: #ffffff; --border: #e2e8f0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; }
+        .sidebar { width: var(--sidebar-width); background: #0f172a; color: white; position: fixed; height: 100vh; z-index: 100; }
+        .sidebar-header { padding: 25px 20px; font-size: 18px; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color); text-align: center; }
+        .nav-link { padding: 14px 25px; display: flex; align-items: center; gap: 12px; color: #94a3b8; text-decoration: none; cursor: pointer; transition: 0.2s; }
+        .nav-link:hover, .nav-link.active { background: rgba(37, 99, 235, 0.1); color: white; border-right: 4px solid var(--primary-color); }
+        .main-container { margin-left: var(--sidebar-width); flex: 1; padding: 30px; width: calc(100% - var(--sidebar-width)); }
+        .page-card { background: var(--white); padding: 25px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        h2 { margin-bottom: 20px; font-size: 20px; font-weight: 700; color: #0f172a; }
+        label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: var(--text-muted); }
+        select, input { width: 100%; padding: 10px 14px; margin-bottom: 20px; border: 1px solid var(--border); border-radius: 8px; outline: none; font-size: 14px; }
+        .btn { border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-success { background: #10b981; color: white; }
+        .btn-warning { background: #f59e0b; color: white; }
+        .btn-download { background: var(--primary-color); color: white; display: none; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; border: 1px solid var(--border); font-size: 14px; text-align: center; }
+        th { background: #f8fafc; color: var(--text-muted); font-size: 12px; }
+        .total-row { background: #f1f5f9; font-weight: 800; color: #000; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        @media (max-width: 768px) { .sidebar { width: 60px; } .sidebar-header, .nav-link span { display: none; } .main-container { margin-left: 60px; width: calc(100% - 60px); } }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="sidebar-header">WATER BIRDS</div>
+    <nav class="nav-menu">
+        <div class="nav-link active" onclick="switchTab('dashboard', this)"><i class="fas fa-home"></i> <span>Dashboard</span></div>
+        <div class="nav-link" onclick="switchTab('entry', this)"><i class="fas fa-edit"></i> <span>Data Entry</span></div>
+        <div class="nav-link" onclick="switchTab('report', this)"><i class="fas fa-file-invoice"></i> <span>Reports</span></div>
+        <div class="nav-link" onclick="switchTab('modify', this)"><i class="fas fa-tools"></i> <span>Modification</span></div>
+    </nav>
+</aside>
+
+<main class="main-container">
+    <div id="dashboard" class="tab-content active">
+        <div class="page-card" style="text-align: center; padding: 100px 20px;">
+            <h1 id="typewriter" style="font-weight: 800; color: #94a3b8; font-size: 24px;"></h1>
+        </div>
+    </div>
+
+    <div id="entry" class="tab-content">
+        <div class="page-card" style="max-width: 600px; margin: 0 auto;">
+            <h2><i class="fas fa-plus-circle"></i> Production Entry</h2>
+            <label>Machine Name</label>
+            <select id="entryMachine" onchange="loadItems()">
+                <option value="">-- Select Machine --</option>
+                <option value="200 machine">200 Machine</option>
+                <option value="3000 machine">3000 Machine</option>
+                <option value="2000 machine">2000 Machine</option>
+                <option value="5000 machine">5000 Machine</option>
+                <option value="10000 machine">10000 Machine</option>
+                <option value="315 mm pipe machin">315 mm Pipe Machine</option>
+                <option value="63 mm pipe machine">63 mm Pipe Machine</option>
+            </select>
+            <div id="entryFields" style="display:none">
+                <label>Item Description</label><select id="entryItem"></select>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div><label>Qty</label><input type="number" id="prodQty"></div>
+                    <div><label>Reject</label><input type="number" id="rejectQty" value="0"></div>
+                </div>
+                <label>Remarks</label><input type="text" id="remarks">
+                <button class="btn btn-success" style="width:100%" onclick="submitEntry()"><i class="fas fa-save"></i> Save Record</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="report" class="tab-content">
+        <div class="page-card">
+            <h2><i class="fas fa-file-alt"></i> Production Reports</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: flex-end;">
+                <div><label>Machine</label><select id="repMachine" onchange="fetchReport()"><option value="ALL">All Machines</option><option value="200 machine">200 machine</option><option value="3000 machine">3000 machine</option><option value="2000 machine">2000 machine</option><option value="5000 machine">5000 machine</option><option value="10000 machine">10000 machine</option><option value="315 mm pipe machin">315 mm pipe machin</option><option value="63 mm pipe machine">63 mm pipe machine</option></select></div>
+                <div><label>From Date</label><input type="date" id="sDate" onchange="fetchReport()"></div>
+                <div><label>To Date</label><input type="date" id="eDate" onchange="fetchReport()"></div>
+                <button class="btn btn-download" id="pdfBtn" onclick="makePDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
+            </div>
+            <div id="reportBox" class="table-container" style="display:none; margin-top:20px;">
+                <div id="pdfContent">
+                    <table border="1">
+                        <thead><tr><th>SL</th><th>Date</th><th>Item Description</th><th>Qty</th><th>Reject</th><th>Remarks</th></tr></thead>
+                        <tbody id="reportData"></tbody>
+                        <tfoot id="reportTotal"></tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modify" class="tab-content">
+        <div class="page-card">
+            <h2><i class="fas fa-tools"></i> Modification</h2>
+            <div id="editBox" style="display:none; background:#fffbeb; padding:20px; border-radius:12px; margin-bottom:20px; border:1px solid #fde68a;">
+                <input type="hidden" id="key">
+                <input type="number" id="mQty" placeholder="Qty">
+                <input type="number" id="mRej" placeholder="Reject">
+                <input type="text" id="mDate" placeholder="Date">
+                <input type="text" id="mRem" placeholder="Remarks">
+                <button class="btn btn-warning" onclick="updateNow()">Update</button>
+            </div>
+            <select id="modMac" onchange="loadModTable()"><option value="">Select Machine...</option><option value="200 machine">200 machine</option><option value="3000 machine">3000 machine</option><option value="2000 machine">2000 machine</option><option value="5000 machine">5000 machine</option><option value="10000 machine">10000 machine</option><option value="315 mm pipe machin">315 mm pipe machin</option><option value="63 mm pipe machine">63 mm pipe machine</option></select>
+            <table><thead><tr><th>Date</th><th>Item</th><th>Qty</th><th>Action</th></tr></thead><tbody id="modData"></tbody></table>
+        </div>
+    </div>
+</main>
+
+<script>
+    // আপনার নতুন Firebase কনফিগারেশন
+    const firebaseConfig = {
+      apiKey: "AIzaSyCumK54qepKZwnlsuZzRKlj9GUFa0HNadU",
+      authDomain: "production-report-dd7b6.firebaseapp.com",
+      projectId: "production-report-dd7b6",
+      storageBucket: "production-report-dd7b6.firebasestorage.app",
+      messagingSenderId: "382347372681",
+      appId: "1:382347372681:web:0703b9ddfec327cc683e58",
+      databaseURL: "https://production-report-dd7b6-default-rtdb.firebaseio.com"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const lists = {
+        "200 machine": ["65 Ltr white watar tank", "10×35 pressure vessel inarshell", "12×52 pressure vessel inarshell", "16×65 pressure vessel inarshell"],
+        "3000 machine": ["500 ltr blow green tank", "1000 ltr blow blue tank", "3000 ltr blow blue tank", "1000 ltr septic tank"],
+        "315 mm pipe machin": ["50 mm pipe", "75 mm pipe", "110 mm pipe", "160 mm pipe", "315 mm pipe"],
+        "63 mm pipe machine": ["50 mm coil", "1\" coil pipe (300 feet) green", "1\" coil pipe (500 feet) green", "3/4\" coil pipe (300 feet) green", "3/4\" coil pipe (500 feet) green", "1/2\" coil pipe (500 feet) green", "1.5\" coil pipe (500 feet) green", "1.5\" coil pipe (300 feet) green", "1.25\" coil pipe (300 feet) green", "1.25\" coil pipe (500 feet) green", "3/4\" coil pipe (500 feet) black", "3/4\" coil pipe (300 feet) black", "1\" coil pipe (500 feet) black", "1.5\" coil pipe (300 feet) black"],
+        "roto": ["100 ltr white roto tank", "150 ltr white roto tank", "300 ltr white roto", "300 ltr green roto tank", "300 ltr black roto", "500 ltr chemical roto", "500 ltr green roto tank", "500 ltr green roto classic", "500 ltr black roto tank", "500 ltr black roto tank classic", "500 ltr 3 layer mosaic tank", "500 ltr 3 layer green roto tank", "750 ltr green roto tank", "750 ltr green roto tank classic", "750 ltr black roto tank", "750 ltr black roto tank classic", "750 ltr 3 layer mosaic tank", "750 3 layer green mosaic water tank", "1000 ltr chemical roto tank", "1000 ltr green roto tank", "1000 ltr green roto tank classic", "1000 ltr black roto tank", "1000 ltr black roto tank classic", "1000 ltr 3 layer green roto tank", "1000 ltr 3 layer mosaic water tank", "1500 chemical roto tank", "1500 ltr green roto tank", "1500 ltr black roto tank", "1500 ltr 3 layer mosaic water tank", "2000 ltr chemical tank", "2000 ltr black roto tank", "2000 ltr 3 layer green roto tank", "2000 ltr 3 layer musaic tank", "2000 ltr green roto tank", "3000 ltr green roto tank", "3000 ltr black roto tank", "5000 ltr black roto tank", "10000 ltr black roto tank"]
+    };
+
+    function switchTab(id, el) {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        el.classList.add('active');
+    }
+
+    function loadItems() {
+        const m = document.getElementById('entryMachine').value;
+        const sub = document.getElementById('entryItem');
+        sub.innerHTML = '';
+        let list = (m.includes("roto") || m.includes("000")) ? lists.roto : lists[m];
+        if(list) { list.forEach(x => sub.innerHTML += `<option value="${x}">${x}</option>`); document.getElementById('entryFields').style.display='block'; }
+    }
+
+    function submitEntry() {
+        const d = { 
+            machine: document.getElementById('entryMachine').value, 
+            item: document.getElementById('entryItem').value, 
+            qty: parseInt(document.getElementById('prodQty').value)||0, 
+            reject: parseInt(document.getElementById('rejectQty').value)||0, 
+            remarks: document.getElementById('remarks').value||"-", 
+            date: new Date().toLocaleDateString('en-GB') 
+        };
+        db.ref('production_logs').push(d).then(() => { alert("Saved!"); location.reload(); });
+    }
+
+    function fetchReport() {
+        const m = document.getElementById('repMachine').value;
+        const s = document.getElementById('sDate').value;
+        const e = document.getElementById('eDate').value;
+        document.getElementById('reportBox').style.display = 'block';
+        db.ref('production_logs').once('value', snap => {
+            let h = "", tQty = 0, tRej = 0, sl = 1;
+            snap.forEach(c => {
+                const v = c.val();
+                const dP = v.date.split('/');
+                const rD = new Date(`${dP[2]}-${dP[1]}-${dP[0]}`);
+                if((m === "ALL" || v.machine === m) && (!s || rD >= new Date(s)) && (!e || rD <= new Date(e))) {
+                    h += `<tr><td>${sl++}</td><td>${v.date}</td><td style="text-align:left">${v.item}</td><td>${v.qty}</td><td>${v.reject}</td><td>${v.remarks}</td></tr>`;
+                    tQty += v.qty; tRej += v.reject;
+                }
+            });
+            document.getElementById('reportData').innerHTML = h;
+            document.getElementById('reportTotal').innerHTML = `<tr class="total-row"><td colspan="3">GRAND TOTAL</td><td>${tQty}</td><td>${tRej}</td><td>-</td></tr>`;
+            document.getElementById('pdfBtn').style.display = 'inline-flex';
+        });
+    }
+
+    function loadModTable() {
+        const m = document.getElementById('modMac').value;
+        db.ref('production_logs').once('value', snap => {
+            let h = "";
+            snap.forEach(c => {
+                const v = c.val();
+                if(v.machine === m) h += `<tr><td>${v.date}</td><td>${v.item}</td><td>${v.qty}</td><td><button class="btn btn-warning" onclick="openMod('${c.key}',${v.qty},${v.reject},'${v.date}','${v.remarks}')">Modify</button></td></tr>`;
+            });
+            document.getElementById('modData').innerHTML = h;
+        });
+    }
+
+    function openMod(k,q,r,d,rem) {
+        document.getElementById('editBox').style.display='block';
+        document.getElementById('key').value=k; document.getElementById('mQty').value=q; document.getElementById('mRej').value=r; document.getElementById('mDate').value=d; document.getElementById('mRem').value=rem;
+    }
+
+    function updateNow() {
+        db.ref('production_logs/'+document.getElementById('key').value).update({ qty: parseInt(document.getElementById('mQty').value), reject: parseInt(document.getElementById('mRej').value), date: document.getElementById('mDate').value, remarks: document.getElementById('mRem').value }).then(() => { alert("Updated"); loadModTable(); document.getElementById('editBox').style.display='none'; });
+    }
+
+    function makePDF() {
+        const element = document.getElementById('pdfContent');
+        const opt = { margin: 10, filename: 'Report.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+        html2pdf().set(opt).from(element).save();
+    }
+
+    let n = 0; const txt = "WATER BIRDS PRODUCTION MANAGEMENT SYSTEM";
+    function type() { if(n < txt.length){ document.getElementById("typewriter").innerHTML += txt.charAt(n); n++; setTimeout(type, 100); } }
+    window.onload = type;
+</script>
+</body>
+</html>
