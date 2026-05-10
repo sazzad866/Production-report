@@ -36,6 +36,12 @@
         .total-row { background: #f1f5f9; font-weight: 800; color: #000; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
+
+        /* PDF Styling */
+        .pdf-header { text-align: center; margin-bottom: 20px; display: none; }
+        .pdf-header h1 { color: #0f172a; margin-bottom: 5px; }
+        .pdf-header p { color: #64748b; font-size: 14px; margin: 2px 0; }
+
         @media (max-width: 768px) { .sidebar { width: 60px; } .sidebar-header, .nav-link span { display: none; } .main-container { margin-left: 60px; width: calc(100% - 60px); } }
     </style>
 </head>
@@ -74,7 +80,7 @@
             </select>
             <div id="entryFields" style="display:none">
                 <label>Production Date</label>
-                <input type="date" id="prodDate"> <!-- নতুন ডেট ইনপুট -->
+                <input type="date" id="prodDate">
                 
                 <label>Item Description</label><select id="entryItem"></select>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -91,13 +97,30 @@
         <div class="page-card">
             <h2><i class="fas fa-file-alt"></i> Production Reports</h2>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: flex-end;">
-                <div><label>Machine</label><select id="repMachine" onchange="fetchReport()"><option value="ALL">All Machines</option><option value="200 machine">200 machine</option><option value="3000 machine">3000 machine</option><option value="2000 machine">2000 machine</option><option value="5000 machine">5000 machine</option><option value="10000 machine">10000 machine</option><option value="315 mm pipe machin">315 mm pipe machin</option><option value="63 mm pipe machine">63 mm pipe machine</option></select></div>
+                <div><label>Machine</label><select id="repMachine" onchange="updateReportItems(); fetchReport()"><option value="ALL">All Machines</option><option value="200 machine">200 machine</option><option value="3000 machine">3000 machine</option><option value="2000 machine">2000 machine</option><option value="5000 machine">5000 machine</option><option value="10000 machine">10000 machine</option><option value="315 mm pipe machin">315 mm pipe machin</option><option value="63 mm pipe machine">63 mm pipe machine</option></select></div>
+                <div><label>Item (Optional)</label><select id="repItem" onchange="fetchReport()"><option value="ALL">All Items</option></select></div>
                 <div><label>From Date</label><input type="date" id="sDate" onchange="fetchReport()"></div>
                 <div><label>To Date</label><input type="date" id="eDate" onchange="fetchReport()"></div>
                 <button class="btn btn-download" id="pdfBtn" onclick="makePDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
             </div>
             <div id="reportBox" class="table-container" style="display:none; margin-top:20px;">
                 <div id="pdfContent">
+                    <!-- PDF Header (Hidden in app, shown in PDF) -->
+                    <div id="pdfHeaderDisplay" class="pdf-header" style="display: block; border-bottom: 2px solid #2563eb; padding-bottom: 15px; margin-bottom: 20px;">
+                        <h1 style="font-size: 22px; margin: 0;">WATER BIRDS LIMITED</h1>
+                        <p style="font-weight: 600; color: #2563eb; margin: 5px 0;">Production Management Report</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; margin-top: 10px; font-size: 12px; text-align: left;">
+                            <div>
+                                <strong>Machine:</strong> <span id="pdfMachineName">-</span><br>
+                                <strong>Item:</strong> <span id="pdfItemName">-</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <strong>Period:</strong> <span id="pdfDateRange">-</span><br>
+                                <strong>Generated:</strong> <span id="pdfGenTime">-</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <table border="1">
                         <thead><tr><th>SL</th><th>Date</th><th>Item Description</th><th>Qty</th><th>Reject</th><th>Remarks</th></tr></thead>
                         <tbody id="reportData"></tbody>
@@ -162,15 +185,23 @@
         if(list) { 
             list.forEach(x => sub.innerHTML += `<option value="${x}">${x}</option>`); 
             document.getElementById('entryFields').style.display='block';
-            // ডিফল্টভাবে আজকের তারিখ সেট করা
             document.getElementById('prodDate').valueAsDate = new Date();
+        }
+    }
+
+    function updateReportItems() {
+        const m = document.getElementById('repMachine').value;
+        const sub = document.getElementById('repItem');
+        sub.innerHTML = '<option value="ALL">All Items</option>';
+        if(m !== "ALL") {
+            let list = (m.includes("roto") || (m.includes("000") && m !== "3000 machine")) ? lists.roto : lists[m];
+            if(list) list.forEach(x => sub.innerHTML += `<option value="${x}">${x}</option>`);
         }
     }
 
     function submitEntry() {
         const selectedDate = new Date(document.getElementById('prodDate').value);
-        const formattedDate = selectedDate.toLocaleDateString('en-GB'); // DD/MM/YYYY ফরম্যাট
-        
+        const formattedDate = selectedDate.toLocaleDateString('en-GB');
         const d = { 
             machine: document.getElementById('entryMachine').value, 
             item: document.getElementById('entryItem').value, 
@@ -184,16 +215,27 @@
 
     function fetchReport() {
         const m = document.getElementById('repMachine').value;
+        const itm = document.getElementById('repItem').value;
         const s = document.getElementById('sDate').value;
         const e = document.getElementById('eDate').value;
         document.getElementById('reportBox').style.display = 'block';
+
+        // PDF তথ্যের জন্য আপডেট
+        document.getElementById('pdfMachineName').innerText = m;
+        document.getElementById('pdfItemName').innerText = itm;
+        document.getElementById('pdfDateRange').innerText = (s || 'Start') + " to " + (e || 'End');
+        document.getElementById('pdfGenTime').innerText = new Date().toLocaleString();
+
         db.ref('production_logs').once('value', snap => {
             let h = "", tQty = 0, tRej = 0, sl = 1;
             snap.forEach(c => {
                 const v = c.val();
                 const dP = v.date.split('/');
                 const rD = new Date(`${dP[2]}-${dP[1]}-${dP[0]}`);
-                if((m === "ALL" || v.machine === m) && (!s || rD >= new Date(s)) && (!e || rD <= new Date(e))) {
+                const matchMachine = (m === "ALL" || v.machine === m);
+                const matchItem = (itm === "ALL" || v.item === itm);
+                const matchDate = (!s || rD >= new Date(s)) && (!e || rD <= new Date(e));
+                if(matchMachine && matchItem && matchDate) {
                     h += `<tr><td>${sl++}</td><td>${v.date}</td><td style="text-align:left">${v.item}</td><td>${v.qty}</td><td>${v.reject}</td><td>${v.remarks}</td></tr>`;
                     tQty += v.qty; tRej += v.reject;
                 }
@@ -227,7 +269,12 @@
 
     function makePDF() {
         const element = document.getElementById('pdfContent');
-        const opt = { margin: 10, filename: 'Report.pdf', html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } };
+        const opt = { 
+            margin: [10, 10, 10, 10], 
+            filename: 'WBL_Production_Report.pdf', 
+            html2canvas: { scale: 2, useCORS: true }, 
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
+        };
         html2pdf().set(opt).from(element).save();
     }
 
