@@ -123,7 +123,6 @@
 </main>
 
 <script>
-    // আপনার নতুন Firebase কনফিগারেশন
     const firebaseConfig = {
       apiKey: "AIzaSyCumK54qepKZwnlsuZzRKlj9GUFa0HNadU",
       authDomain: "production-report-dd7b6.firebaseapp.com",
@@ -139,7 +138,7 @@
 
     const lists = {
         "200 machine": ["65 Ltr white watar tank", "10×35 pressure vessel inarshell", "12×52 pressure vessel inarshell", "16×65 pressure vessel inarshell"],
-        "3000 machine": ["500 ltr blow green tank", "1000 ltr blow blue tank", "3000 ltr blow blue tank", "1000 ltr septic tank"],
+        "3000 machine": ["500 ltr blow green tank", "1000 ltr blow green tank", "3000 ltr blow blue tank", "1000 ltr septic tank"],
         "315 mm pipe machin": ["50 mm pipe", "75 mm pipe", "110 mm pipe", "160 mm pipe", "315 mm pipe"],
         "63 mm pipe machine": ["50 mm coil", "1\" coil pipe (300 feet) green", "1\" coil pipe (500 feet) green", "3/4\" coil pipe (300 feet) green", "3/4\" coil pipe (500 feet) green", "1/2\" coil pipe (500 feet) green", "1.5\" coil pipe (500 feet) green", "1.5\" coil pipe (300 feet) green", "1.25\" coil pipe (300 feet) green", "1.25\" coil pipe (500 feet) green", "3/4\" coil pipe (500 feet) black", "3/4\" coil pipe (300 feet) black", "1\" coil pipe (500 feet) black", "1.5\" coil pipe (300 feet) black"],
         "roto": ["100 ltr white roto tank", "150 ltr white roto tank", "300 ltr white roto", "300 ltr green roto tank", "300 ltr black roto", "500 ltr chemical roto", "500 ltr green roto tank", "500 ltr green roto classic", "500 ltr black roto tank", "500 ltr black roto tank classic", "500 ltr 3 layer mosaic tank", "500 ltr 3 layer green roto tank", "750 ltr green roto tank", "750 ltr green roto tank classic", "750 ltr black roto tank", "750 ltr black roto tank classic", "750 ltr 3 layer mosaic tank", "750 3 layer green mosaic water tank", "1000 ltr chemical roto tank", "1000 ltr green roto tank", "1000 ltr green roto tank classic", "1000 ltr black roto tank", "1000 ltr black roto tank classic", "1000 ltr 3 layer green roto tank", "1000 ltr 3 layer mosaic water tank", "1500 chemical roto tank", "1500 ltr green roto tank", "1500 ltr black roto tank", "1500 ltr 3 layer mosaic water tank", "2000 ltr chemical tank", "2000 ltr black roto tank", "2000 ltr 3 layer green roto tank", "2000 ltr 3 layer musaic tank", "2000 ltr green roto tank", "3000 ltr green roto tank", "3000 ltr black roto tank", "5000 ltr black roto tank", "10000 ltr black roto tank"]
@@ -156,7 +155,7 @@
         const m = document.getElementById('entryMachine').value;
         const sub = document.getElementById('entryItem');
         sub.innerHTML = '';
-        let list = (m.includes("roto") || m.includes("000")) ? lists.roto : lists[m];
+        let list = (m.includes("roto") || (m.includes("000") && m !== "3000 machine")) ? lists.roto : lists[m];
         if(list) { list.forEach(x => sub.innerHTML += `<option value="${x}">${x}</option>`); document.getElementById('entryFields').style.display='block'; }
     }
 
