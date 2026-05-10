@@ -37,7 +37,6 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* PDF Styling */
         .pdf-header { text-align: center; margin-bottom: 20px; display: none; }
         .pdf-header h1 { color: #0f172a; margin-bottom: 5px; }
         .pdf-header p { color: #64748b; font-size: 14px; margin: 2px 0; }
@@ -81,6 +80,12 @@
             <div id="entryFields" style="display:none">
                 <label>Production Date</label>
                 <input type="date" id="prodDate">
+
+                <label>Shift (Day / Night)</label>
+                <select id="prodShift">
+                    <option value="Day">Day</option>
+                    <option value="Night">Night</option>
+                </select>
                 
                 <label>Item Description</label><select id="entryItem"></select>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
@@ -105,7 +110,6 @@
             </div>
             <div id="reportBox" class="table-container" style="display:none; margin-top:20px;">
                 <div id="pdfContent">
-                    <!-- PDF Header (Hidden in app, shown in PDF) -->
                     <div id="pdfHeaderDisplay" class="pdf-header" style="display: block; border-bottom: 2px solid #2563eb; padding-bottom: 15px; margin-bottom: 20px;">
                         <h1 style="font-size: 22px; margin: 0;">WATER BIRDS LIMITED</h1>
                         <p style="font-weight: 600; color: #2563eb; margin: 5px 0;">Production Management Report</p>
@@ -122,7 +126,7 @@
                     </div>
 
                     <table border="1">
-                        <thead><tr><th>SL</th><th>Date</th><th>Item Description</th><th>Qty</th><th>Reject</th><th>Remarks</th></tr></thead>
+                        <thead><tr><th>SL</th><th>Date</th><th>Shift</th><th>Item Description</th><th>Qty</th><th>Reject</th><th>Remarks</th></tr></thead>
                         <tbody id="reportData"></tbody>
                         <tfoot id="reportTotal"></tfoot>
                     </table>
@@ -139,11 +143,12 @@
                 <input type="number" id="mQty" placeholder="Qty">
                 <input type="number" id="mRej" placeholder="Reject">
                 <input type="text" id="mDate" placeholder="Date">
+                <input type="text" id="mShift" placeholder="Shift">
                 <input type="text" id="mRem" placeholder="Remarks">
                 <button class="btn btn-warning" onclick="updateNow()">Update</button>
             </div>
             <select id="modMac" onchange="loadModTable()"><option value="">Select Machine...</option><option value="200 machine">200 machine</option><option value="3000 machine">3000 machine</option><option value="2000 machine">2000 machine</option><option value="5000 machine">5000 machine</option><option value="10000 machine">10000 machine</option><option value="315 mm pipe machin">315 mm pipe machin</option><option value="63 mm pipe machine">63 mm pipe machine</option></select>
-            <table><thead><tr><th>Date</th><th>Item</th><th>Qty</th><th>Action</th></tr></thead><tbody id="modData"></tbody></table>
+            <table><thead><tr><th>Date</th><th>Shift</th><th>Item</th><th>Qty</th><th>Action</th></tr></thead><tbody id="modData"></tbody></table>
         </div>
     </div>
 </main>
@@ -204,6 +209,7 @@
         const formattedDate = selectedDate.toLocaleDateString('en-GB');
         const d = { 
             machine: document.getElementById('entryMachine').value, 
+            shift: document.getElementById('prodShift').value,
             item: document.getElementById('entryItem').value, 
             qty: parseInt(document.getElementById('prodQty').value)||0, 
             reject: parseInt(document.getElementById('rejectQty').value)||0, 
@@ -220,28 +226,37 @@
         const e = document.getElementById('eDate').value;
         document.getElementById('reportBox').style.display = 'block';
 
-        // PDF তথ্যের জন্য আপডেট
         document.getElementById('pdfMachineName').innerText = m;
         document.getElementById('pdfItemName').innerText = itm;
         document.getElementById('pdfDateRange').innerText = (s || 'Start') + " to " + (e || 'End');
         document.getElementById('pdfGenTime').innerText = new Date().toLocaleString();
 
         db.ref('production_logs').once('value', snap => {
-            let h = "", tQty = 0, tRej = 0, sl = 1;
+            let records = [];
             snap.forEach(c => {
                 const v = c.val();
                 const dP = v.date.split('/');
-                const rD = new Date(`${dP[2]}-${dP[1]}-${dP[0]}`);
+                const rD = new Date(`${dP[2]}-${dP[1]}-${dP[0]}`); // YYYY-MM-DD
                 const matchMachine = (m === "ALL" || v.machine === m);
                 const matchItem = (itm === "ALL" || v.item === itm);
                 const matchDate = (!s || rD >= new Date(s)) && (!e || rD <= new Date(e));
+                
                 if(matchMachine && matchItem && matchDate) {
-                    h += `<tr><td>${sl++}</td><td>${v.date}</td><td style="text-align:left">${v.item}</td><td>${v.qty}</td><td>${v.reject}</td><td>${v.remarks}</td></tr>`;
-                    tQty += v.qty; tRej += v.reject;
+                    records.push({...v, timestamp: rD.getTime()});
                 }
             });
+
+            // তারিখ অনুযায়ী সিরিয়াল করা (Soring by Date)
+            records.sort((a, b) => a.timestamp - b.timestamp);
+
+            let h = "", tQty = 0, tRej = 0, sl = 1;
+            records.forEach(v => {
+                h += `<tr><td>${sl++}</td><td>${v.date}</td><td>${v.shift || '-'}</td><td style="text-align:left">${v.item}</td><td>${v.qty}</td><td>${v.reject}</td><td>${v.remarks}</td></tr>`;
+                tQty += v.qty; tRej += v.reject;
+            });
+
             document.getElementById('reportData').innerHTML = h;
-            document.getElementById('reportTotal').innerHTML = `<tr class="total-row"><td colspan="3">GRAND TOTAL</td><td>${tQty}</td><td>${tRej}</td><td>-</td></tr>`;
+            document.getElementById('reportTotal').innerHTML = `<tr class="total-row"><td colspan="4">GRAND TOTAL</td><td>${tQty}</td><td>${tRej}</td><td>-</td></tr>`;
             document.getElementById('pdfBtn').style.display = 'inline-flex';
         });
     }
@@ -249,22 +264,44 @@
     function loadModTable() {
         const m = document.getElementById('modMac').value;
         db.ref('production_logs').once('value', snap => {
-            let h = "";
+            let records = [];
             snap.forEach(c => {
                 const v = c.val();
-                if(v.machine === m) h += `<tr><td>${v.date}</td><td>${v.item}</td><td>${v.qty}</td><td><button class="btn btn-warning" onclick="openMod('${c.key}',${v.qty},${v.reject},'${v.date}','${v.remarks}')">Modify</button></td></tr>`;
+                if(v.machine === m) {
+                    const dP = v.date.split('/');
+                    const rD = new Date(`${dP[2]}-${dP[1]}-${dP[0]}`);
+                    records.push({...v, key: c.key, timestamp: rD.getTime()});
+                }
+            });
+            
+            records.sort((a, b) => a.timestamp - b.timestamp);
+
+            let h = "";
+            records.forEach(v => {
+                h += `<tr><td>${v.date}</td><td>${v.shift || 'Day'}</td><td>${v.item}</td><td>${v.qty}</td><td><button class="btn btn-warning" onclick="openMod('${v.key}',${v.qty},${v.reject},'${v.date}','${v.remarks}','${v.shift || 'Day'}')">Modify</button></td></tr>`;
             });
             document.getElementById('modData').innerHTML = h;
         });
     }
 
-    function openMod(k,q,r,d,rem) {
+    function openMod(k,q,r,d,rem,sh) {
         document.getElementById('editBox').style.display='block';
-        document.getElementById('key').value=k; document.getElementById('mQty').value=q; document.getElementById('mRej').value=r; document.getElementById('mDate').value=d; document.getElementById('mRem').value=rem;
+        document.getElementById('key').value=k; 
+        document.getElementById('mQty').value=q; 
+        document.getElementById('mRej').value=r; 
+        document.getElementById('mDate').value=d; 
+        document.getElementById('mRem').value=rem;
+        document.getElementById('mShift').value=sh;
     }
 
     function updateNow() {
-        db.ref('production_logs/'+document.getElementById('key').value).update({ qty: parseInt(document.getElementById('mQty').value), reject: parseInt(document.getElementById('mRej').value), date: document.getElementById('mDate').value, remarks: document.getElementById('mRem').value }).then(() => { alert("Updated"); loadModTable(); document.getElementById('editBox').style.display='none'; });
+        db.ref('production_logs/'+document.getElementById('key').value).update({ 
+            qty: parseInt(document.getElementById('mQty').value), 
+            reject: parseInt(document.getElementById('mRej').value), 
+            date: document.getElementById('mDate').value, 
+            remarks: document.getElementById('mRem').value,
+            shift: document.getElementById('mShift').value
+        }).then(() => { alert("Updated"); loadModTable(); document.getElementById('editBox').style.display='none'; });
     }
 
     function makePDF() {
