@@ -73,6 +73,9 @@
                 <option value="63 mm pipe machine">63 mm Pipe Machine</option>
             </select>
             <div id="entryFields" style="display:none">
+                <label>Production Date</label>
+                <input type="date" id="prodDate"> <!-- নতুন ডেট ইনপুট -->
+                
                 <label>Item Description</label><select id="entryItem"></select>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                     <div><label>Qty</label><input type="number" id="prodQty"></div>
@@ -156,17 +159,25 @@
         const sub = document.getElementById('entryItem');
         sub.innerHTML = '';
         let list = (m.includes("roto") || (m.includes("000") && m !== "3000 machine")) ? lists.roto : lists[m];
-        if(list) { list.forEach(x => sub.innerHTML += `<option value="${x}">${x}</option>`); document.getElementById('entryFields').style.display='block'; }
+        if(list) { 
+            list.forEach(x => sub.innerHTML += `<option value="${x}">${x}</option>`); 
+            document.getElementById('entryFields').style.display='block';
+            // ডিফল্টভাবে আজকের তারিখ সেট করা
+            document.getElementById('prodDate').valueAsDate = new Date();
+        }
     }
 
     function submitEntry() {
+        const selectedDate = new Date(document.getElementById('prodDate').value);
+        const formattedDate = selectedDate.toLocaleDateString('en-GB'); // DD/MM/YYYY ফরম্যাট
+        
         const d = { 
             machine: document.getElementById('entryMachine').value, 
             item: document.getElementById('entryItem').value, 
             qty: parseInt(document.getElementById('prodQty').value)||0, 
             reject: parseInt(document.getElementById('rejectQty').value)||0, 
             remarks: document.getElementById('remarks').value||"-", 
-            date: new Date().toLocaleDateString('en-GB') 
+            date: formattedDate 
         };
         db.ref('production_logs').push(d).then(() => { alert("Saved!"); location.reload(); });
     }
