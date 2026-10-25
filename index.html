@@ -3,321 +3,747 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WATER BIRDS LTD | ERP SYSTEM</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>ERP System - Water Birds Limited</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <style>
-        :root { --sidebar-width: 240px; --primary-color: #2563eb; --bg-body: #f8fafc; --text-main: #1e293b; --text-muted: #64748b; --white: #ffffff; --border: #e2e8f0; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background-color: var(--bg-body); color: var(--text-main); display: flex; min-height: 100vh; }
-        .sidebar { width: var(--sidebar-width); background: #0f172a; color: white; position: fixed; height: 100vh; z-index: 100; }
-        .sidebar-header { padding: 25px 20px; font-size: 18px; font-weight: 800; border-bottom: 1px solid rgba(255,255,255,0.1); color: var(--primary-color); text-align: center; }
-        .nav-link { padding: 14px 25px; display: flex; align-items: center; gap: 12px; color: #94a3b8; text-decoration: none; cursor: pointer; transition: 0.2s; }
-        .nav-link:hover, .nav-link.active { background: rgba(37, 99, 235, 0.1); color: white; border-right: 4px solid var(--primary-color); }
-        .main-container { margin-left: var(--sidebar-width); flex: 1; padding: 30px; width: calc(100% - var(--sidebar-width)); }
-        .page-card { background: var(--white); padding: 25px; border-radius: 16px; border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        h2 { margin-bottom: 20px; font-size: 20px; font-weight: 700; color: #0f172a; }
-        label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; color: var(--text-muted); }
-        select, input { width: 100%; padding: 10px 14px; margin-bottom: 20px; border: 1px solid var(--border); border-radius: 8px; outline: none; font-size: 14px; }
-        .btn { border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
-        .btn-success { background: #10b981; color: white; }
-        .btn-warning { background: #f59e0b; color: white; }
-        .btn-download { background: var(--primary-color); color: white; display: none; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; border: 1px solid var(--border); font-size: 14px; text-align: center; }
-        th { background: #f8fafc; color: var(--text-muted); font-size: 12px; }
-        .total-row { background: #f1f5f9; font-weight: 800; color: #000; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        .pdf-header { text-align: center; margin-bottom: 20px; display: none; }
-        .pdf-header h1 { color: #0f172a; margin-bottom: 5px; }
-        .pdf-header p { color: #64748b; font-size: 14px; margin: 2px 0; }
-
-        @media (max-width: 768px) { .sidebar { width: 60px; } .sidebar-header, .nav-link span { display: none; } .main-container { margin-left: 60px; width: calc(100% - 60px); } }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white !important; }
+            #printableReportArea { 
+                padding: 0 !important; 
+                margin: 0 !important; 
+                box-shadow: none !important;
+                border: none !important;
+            }
+            @page { size: A4; margin: 15mm; }
+        }
     </style>
 </head>
-<body>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
 
-<aside class="sidebar">
-    <div class="sidebar-header">WATER BIRDS</div>
-    <nav class="nav-menu">
-        <div class="nav-link active" onclick="switchTab('dashboard', this)"><i class="fas fa-home"></i> <span>Dashboard</span></div>
-        <div class="nav-link" onclick="switchTab('entry', this)"><i class="fas fa-edit"></i> <span>Data Entry</span></div>
-        <div class="nav-link" onclick="switchTab('report', this)"><i class="fas fa-file-invoice"></i> <span>Reports</span></div>
-        <div class="nav-link" onclick="switchTab('modify', this)"><i class="fas fa-tools"></i> <span>Modification</span></div>
+    <!-- Header -->
+    <header class="bg-emerald-800 text-white shadow-sm no-print">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-3">
+            <div>
+                <h1 class="text-xl font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-industry"></i> ERP System
+                </h1>
+                <p class="text-xs text-emerald-200">Pipe, Water Tank, Pressure Vessel & Fittings Management</p>
+            </div>
+            <div class="text-xs bg-emerald-900 px-3 py-1.5 rounded-lg border border-emerald-700">
+                <i class="fa-regular fa-clock mr-1"></i> <span id="liveClock"></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="bg-white border-b shadow-sm no-print sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 flex overflow-x-auto text-sm font-medium">
+            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="px-5 py-3.5 border-b-2 border-emerald-600 text-emerald-700 flex items-center gap-2 whitespace-nowrap transition"><i class="fa-solid fa-house"></i> Dashboard</button>
+            <button onclick="switchTab('inventory')" id="tab-inventory" class="px-5 py-3.5 border-b-2 border-transparent text-slate-600 hover:text-emerald-600 flex items-center gap-2 whitespace-nowrap transition"><i class="fa-solid fa-boxes-stacked"></i> Stock & Inventory</button>
+            <button onclick="switchTab('production')" id="tab-production" class="px-5 py-3.5 border-b-2 border-transparent text-slate-600 hover:text-emerald-600 flex items-center gap-2 whitespace-nowrap transition"><i class="fa-solid fa-gears"></i> Production</button>
+            <button onclick="switchTab('reports')" id="tab-reports" class="px-5 py-3.5 border-b-2 border-transparent text-slate-600 hover:text-emerald-600 flex items-center gap-2 whitespace-nowrap transition"><i class="fa-solid fa-file-lines"></i> Reports</button>
+        </div>
     </nav>
-</aside>
 
-<main class="main-container">
-    <div id="dashboard" class="tab-content active">
-        <div class="page-card" style="text-align: center; padding: 100px 20px;">
-            <h1 id="typewriter" style="font-weight: 800; color: #94a3b8; font-size: 24px;"></h1>
-        </div>
-    </div>
+    <!-- Main Content Body -->
+    <main class="max-w-7xl mx-auto px-6 py-8 flex-grow w-full space-y-6">
 
-    <div id="entry" class="tab-content">
-        <div class="page-card" style="max-width: 600px; margin: 0 auto;">
-            <h2><i class="fas fa-plus-circle"></i> Production Entry</h2>
-            <label>Machine Name</label>
-            <select id="entryMachine" onchange="loadItems()">
-                <option value="">-- Select Machine --</option>
-                <option value="200 machine">200 Machine</option>
-                <option value="3000 machine">3000 Machine</option>
-                <option value="2000 machine">2000 Machine</option>
-                <option value="5000 machine">5000 Machine</option>
-                <option value="10000 machine">10000 Machine</option>
-                <option value="315 mm pipe machin">315 mm Pipe Machine</option>
-                <option value="63 mm pipe machine">63 mm Pipe Machine</option>
-            </select>
-            <div id="entryFields" style="display:none">
-                <label>Production Date</label>
-                <input type="date" id="prodDate">
+        <!-- DASHBOARD TAB -->
+        <section id="sec-dashboard" class="space-y-6">
+            <div class="bg-white p-10 rounded-2xl shadow-sm border border-slate-200 text-center py-16">
+                <i class="fa-solid fa-industry text-5xl text-emerald-600 mb-4"></i>
+                <h2 class="text-2xl font-bold text-slate-800">Welcome to ERP System</h2>
+                <p class="text-sm text-slate-500 mt-2 max-w-lg mx-auto">Use the navigation tabs above to manage inventory stock, record production lines, and view reports easily.</p>
+            </div>
+        </section>
 
-                <label>Shift (Day / Night)</label>
-                <select id="prodShift">
-                    <option value="Day">Day</option>
-                    <option value="Night">Night</option>
-                </select>
-                
-                <label>Item Description</label><select id="entryItem"></select>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                    <div><label>Qty</label><input type="number" id="prodQty"></div>
-                    <div><label>Reject</label><input type="number" id="rejectQty" value="0"></div>
+        <!-- INVENTORY TAB -->
+        <section id="sec-inventory" class="hidden space-y-6">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-3 items-center justify-between no-print">
+                <div class="flex flex-wrap items-center gap-2">
+                    <button onclick="openModal('addModal')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 transition"><i class="fa-solid fa-plus"></i> New Item</button>
+                    <button onclick="openModal('stockInModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 transition"><i class="fa-solid fa-arrow-down"></i> Stock In</button>
+                    <button onclick="openModal('stockOutModal')" class="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 transition"><i class="fa-solid fa-arrow-up"></i> Stock Out</button>
+                    <button onclick="openModal('bulkStockOutModal')" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2 transition"><i class="fa-solid fa-list-check"></i> Bulk Stock Out</button>
                 </div>
-                <label>Remarks</label><input type="text" id="remarks">
-                <button class="btn btn-success" style="width:100%" onclick="submitEntry()"><i class="fas fa-save"></i> Save Record</button>
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    <input type="text" id="searchInput" oninput="renderTable()" placeholder="Search Item..." class="border border-slate-200 px-3.5 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 w-full md:w-60 bg-slate-50">
+                    <select id="categoryFilter" onchange="renderTable()" class="border border-slate-200 px-3.5 py-2 rounded-lg text-sm bg-slate-50">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <div id="report" class="tab-content">
-        <div class="page-card">
-            <h2><i class="fas fa-file-alt"></i> Production Reports</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: flex-end;">
-                <div><label>Machine</label><select id="repMachine" onchange="updateReportItems(); fetchReport()"><option value="ALL">All Machines</option><option value="200 machine">200 machine</option><option value="3000 machine">3000 machine</option><option value="2000 machine">2000 machine</option><option value="5000 machine">5000 machine</option><option value="10000 machine">10000 machine</option><option value="315 mm pipe machin">315 mm pipe machin</option><option value="63 mm pipe machine">63 mm pipe machine</option></select></div>
-                <div><label>Item (Optional)</label><select id="repItem" onchange="fetchReport()"><option value="ALL">All Items</option></select></div>
-                <div><label>From Date</label><input type="date" id="sDate" onchange="fetchReport()"></div>
-                <div><label>To Date</label><input type="date" id="eDate" onchange="fetchReport()"></div>
-                <button class="btn btn-download" id="pdfBtn" onclick="makePDF()"><i class="fas fa-file-pdf"></i> Download PDF</button>
-            </div>
-            <div id="reportBox" class="table-container" style="display:none; margin-top:20px;">
-                <div id="pdfContent">
-                    <div id="pdfHeaderDisplay" class="pdf-header" style="display: block; border-bottom: 2px solid #2563eb; padding-bottom: 15px; margin-bottom: 20px;">
-                        <h1 style="font-size: 22px; margin: 0;">WATER BIRDS LIMITED</h1>
-                        <p style="font-weight: 600; color: #2563eb; margin: 5px 0;">Production Management Report</p>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; margin-top: 10px; font-size: 12px; text-align: left;">
-                            <div>
-                                <strong>Machine:</strong> <span id="pdfMachineName">-</span><br>
-                                <strong>Item:</strong> <span id="pdfItemName">-</span>
-                            </div>
-                            <div style="text-align: right;">
-                                <strong>Period:</strong> <span id="pdfDateRange">-</span><br>
-                                <strong>Generated:</strong> <span id="pdfGenTime">-</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <table border="1">
-                        <thead><tr><th>SL</th><th>Date</th><th>Shift</th><th>Item Description</th><th>Qty</th><th>Reject</th><th>Remarks</th></tr></thead>
-                        <tbody id="reportData"></tbody>
-                        <tfoot id="reportTotal"></tfoot>
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-600 text-xs font-bold uppercase tracking-wider border-b">
+                                <th class="p-4">Code</th>
+                                <th class="p-4">Item Name</th>
+                                <th class="p-4">Type / Category</th>
+                                <th class="p-4">Unit</th>
+                                <th class="p-4 text-center">Stock Qty</th>
+                                <th class="p-4 text-center no-print">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inventoryTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
                     </table>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
 
-    <div id="modify" class="tab-content">
-        <div class="page-card">
-            <h2><i class="fas fa-tools"></i> Modification</h2>
-            <div id="editBox" style="display:none; background:#fffbeb; padding:20px; border-radius:12px; margin-bottom:20px; border:1px solid #fde68a;">
-                <input type="hidden" id="key">
-                <input type="number" id="mQty" placeholder="Qty">
-                <input type="number" id="mRej" placeholder="Reject">
-                <input type="text" id="mDate" placeholder="Date">
-                <input type="text" id="mShift" placeholder="Shift">
-                <input type="text" id="mRem" placeholder="Remarks">
-                <button class="btn btn-warning" onclick="updateNow()">Update</button>
+        <!-- PRODUCTION TAB -->
+        <section id="sec-production" class="hidden space-y-6">
+            <div class="flex gap-2 border-b pb-3 overflow-x-auto">
+                <button onclick="switchProdSub('pipe')" id="subtab-pipe" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold shadow-sm whitespace-nowrap transition"><i class="fa-solid fa-water"></i> Pipe Production</button>
+                <button onclick="switchProdSub('fittings')" id="subtab-fittings" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold whitespace-nowrap transition"><i class="fa-solid fa-puzzle-piece"></i> Pipe Fittings Production</button>
+                <button onclick="switchProdSub('tank')" id="subtab-tank" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold whitespace-nowrap transition"><i class="fa-solid fa-database"></i> Water Tank Production</button>
+                <button onclick="switchProdSub('vessel')" id="subtab-vessel" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold whitespace-nowrap transition"><i class="fa-solid fa-circle-notch"></i> Pressure Vessel Production</button>
             </div>
-            <select id="modMac" onchange="loadModTable()"><option value="">Select Machine...</option><option value="200 machine">200 machine</option><option value="3000 machine">3000 machine</option><option value="2000 machine">2000 machine</option><option value="5000 machine">5000 machine</option><option value="10000 machine">10000 machine</option><option value="315 mm pipe machin">315 mm pipe machin</option><option value="63 mm pipe machine">63 mm pipe machine</option></select>
-            <table><thead><tr><th>Date</th><th>Shift</th><th>Item</th><th>Qty</th><th>Action</th></tr></thead><tbody id="modData"></tbody></table>
+
+            <!-- PIPE PRODUCTION SYSTEM -->
+            <div id="prodsub-pipe" class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                <h3 class="font-bold text-base text-blue-700 border-b pb-2 flex items-center gap-2"><i class="fa-solid fa-water"></i> Pipe Production System</h3>
+                <form onsubmit="handleSpecialProduction(event, 'Pipe')" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Pipe Product *</label>
+                            <select id="pipeOutputItem" required class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Production Quantity (Meters) *</label>
+                            <input type="number" id="pipeOutputQty" min="1" required placeholder="e.g. 500 Meters" class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Extrusion Machine / Batch Note</label>
+                            <input type="text" id="pipeNote" placeholder="Machine No / Operator name" class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm">
+                        </div>
+                    </div>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium text-sm transition">Process Pipe Production</button>
+                </form>
+            </div>
+
+            <!-- PIPE FITTINGS PRODUCTION SYSTEM -->
+            <div id="prodsub-fittings" class="hidden bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                <h3 class="font-bold text-base text-indigo-700 border-b pb-2 flex items-center gap-2"><i class="fa-solid fa-puzzle-piece"></i> Pipe Fittings Production System</h3>
+                <form onsubmit="handleFittingProduction(event)" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Fitting Item *</label>
+                            <select id="fittingOutputItem" required class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Production Quantity (PCS) *</label>
+                            <input type="number" id="fittingOutputQty" min="1" required placeholder="e.g. 200 PCS" class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Injection Moulding / Batch Note</label>
+                            <input type="text" id="fittingNote" placeholder="Mould No / Operator name" class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm">
+                        </div>
+                    </div>
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium text-sm transition">Process Fittings Production</button>
+                </form>
+            </div>
+
+            <!-- WATER TANK PRODUCTION SYSTEM -->
+            <div id="prodsub-tank" class="hidden bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                <h3 class="font-bold text-base text-emerald-700 border-b pb-2 flex items-center gap-2"><i class="fa-solid fa-database"></i> Water Tank Production System</h3>
+                <form onsubmit="handleSpecialProduction(event, 'Tank')" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Water Tank Model *</label>
+                            <select id="tankOutputItem" required class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Production Quantity (Pieces) *</label>
+                            <input type="number" id="tankOutputQty" min="1" required placeholder="e.g. 10 PCS" class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Rotomoulding Machine / Batch Note</label>
+                            <input type="text" id="tankNote" placeholder="Mould No / Color Batch" class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm">
+                        </div>
+                    </div>
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-lg font-medium text-sm transition">Process Water Tank Production</button>
+                </form>
+            </div>
+
+            <!-- PRESSURE VESSEL PRODUCTION SYSTEM -->
+            <div id="prodsub-vessel" class="hidden bg-white p-6 rounded-xl shadow-sm border border-slate-200 space-y-4">
+                <h3 class="font-bold text-base text-amber-700 border-b pb-2 flex items-center gap-2"><i class="fa-solid fa-circle-notch"></i> Pressure Vessel Production System</h3>
+                <form onsubmit="handleSpecialProduction(event, 'Vessel')" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Select Pressure Vessel Model *</label>
+                            <select id="vesselOutputItem" required class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm"></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Production Quantity (Pieces) *</label>
+                            <input type="number" id="vesselOutputQty" min="1" required placeholder="e.g. 5 PCS" class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Assembly / Testing Note</label>
+                            <input type="text" id="vesselNote" placeholder="Pressure test passed batch" class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm">
+                        </div>
+                    </div>
+                    <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-5 py-2 rounded-lg font-medium text-sm transition">Process Pressure Vessel Production</button>
+                </form>
+            </div>
+
+            <!-- Production Logs History -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
+                <h4 class="font-bold text-slate-700 mb-3 text-sm">Recent Production History</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead class="bg-slate-50 text-xs text-slate-600 uppercase">
+                            <tr>
+                                <th class="p-3 border-b">Date</th>
+                                <th class="p-3 border-b">Category</th>
+                                <th class="p-3 border-b">Finished Product</th>
+                                <th class="p-3 border-b text-center">Qty Produced</th>
+                                <th class="p-3 border-b">Note</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productionLogTable" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- REPORTS TAB -->
+        <section id="sec-reports" class="hidden space-y-6">
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 space-y-4 no-print">
+                <h2 class="font-bold text-base text-slate-700 flex items-center gap-2"><i class="fa-solid fa-filter text-emerald-600"></i> Category Stock Report Search</h2>
+                <div class="flex flex-col sm:flex-row items-center gap-3">
+                    <select id="reportCategorySelect" class="w-full sm:w-64 border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        <option value="">-- Select Category --</option>
+                        <option value="Pipe">Pipe</option>
+                        <option value="Fitting">Pipe Fitting</option>
+                        <option value="Tank">Water Tank</option>
+                        <option value="Vessel">Pressure Vessel</option>
+                    </select>
+                    <button onclick="searchReport()" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition">
+                        <i class="fa-solid fa-magnifying-glass"></i> Search Report
+                    </button>
+                </div>
+            </div>
+
+            <!-- SEARCH RESULT & REPORT DISPLAY AREA -->
+            <div id="reportResultContainer" class="hidden bg-white p-8 rounded-xl shadow-sm border border-slate-200 space-y-6 max-w-4xl mx-auto">
+                <div class="flex justify-between items-center border-b pb-4 no-print">
+                    <h3 class="font-bold text-slate-800 text-base flex items-center gap-2">
+                        <i class="fa-solid fa-file-lines text-emerald-600"></i> Preview Report
+                    </h3>
+                    <button onclick="downloadPDF()" class="bg-emerald-700 hover:bg-emerald-800 text-white px-5 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2 shadow-sm transition">
+                        <i class="fa-solid fa-print"></i> Download / Print PDF Report
+                    </button>
+                </div>
+
+                <!-- Printable Styled Area -->
+                <div id="printableReportArea" class="p-6 bg-white border border-slate-200 rounded-xl space-y-6">
+                    <!-- Report Header -->
+                    <div class="flex justify-between items-start border-b-2 border-emerald-700 pb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-emerald-800 flex items-center gap-2">
+                                <i class="fa-solid fa-boxes-stacked"></i> Current Stock Report
+                            </h2>
+                            <p class="text-xs text-slate-500 mt-1">Item-wise stock status summary</p>
+                        </div>
+                        <div class="text-right">
+                            <span id="reportTitleBadge" class="text-xs font-bold bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full inline-block">Category Report</span>
+                            <p class="text-xs text-slate-400 mt-2">Date: <span id="reportGeneratedDate"></span></p>
+                        </div>
+                    </div>
+
+                    <!-- Table Section -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="bg-emerald-800 text-white text-xs uppercase">
+                                    <th class="p-3 border-b border-emerald-900 text-center w-16">SL</th>
+                                    <th class="p-3 border-b border-emerald-900">Item Name</th>
+                                    <th class="p-3 border-b border-emerald-900">Category</th>
+                                    <th class="p-3 border-b border-emerald-900 text-center">Current Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody id="repSearchResultTable" class="divide-y divide-slate-100"></tbody>
+                            <tfoot id="repSearchTableFoot"></tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t text-slate-500 py-4 text-center text-xs no-print sm:mt-auto">
+        ERP System &copy; <span id="year"></span> | All rights reserved.
+    </footer>
+
+    <!-- MODALS -->
+
+    <!-- Add Inventory Item Modal -->
+    <div id="addModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border">
+            <div class="bg-emerald-700 text-white px-5 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-base">Add New Item</h3>
+                <button onclick="closeModal('addModal')" class="text-white/80 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="addProductForm" onsubmit="handleAddProduct(event)" class="p-5 space-y-3.5">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Item Type *</label>
+                    <select id="pType" onchange="autoGenerateCode()" class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm">
+                        <option value="Pipe">Pipe (PIPE-)</option>
+                        <option value="Fitting">Pipe Fitting (FIT-)</option>
+                        <option value="Tank">Water Tank (TANK-)</option>
+                        <option value="Vessel">Pressure Vessel (VESSEL-)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Code / SKU *</label>
+                    <input type="text" id="pCode" required class="w-full border border-slate-200 bg-slate-100 p-2.5 rounded-lg text-sm font-semibold text-slate-700">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Item Name *</label>
+                    <input type="text" id="pName" required placeholder="Example: HDPE Pipe 110mm / Elbow 110mm" class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Unit</label>
+                        <input type="text" id="pUnit" placeholder="PCS / Meter" class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Initial Qty</label>
+                        <input type="number" id="pQty" value="0" class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('addModal')" class="px-4 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg text-sm transition">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition">Save Item</button>
+                </div>
+            </form>
         </div>
     </div>
-</main>
 
-<script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCumK54qepKZwnlsuZzRKlj9GUFa0HNadU",
-      authDomain: "production-report-dd7b6.firebaseapp.com",
-      projectId: "production-report-dd7b6",
-      storageBucket: "production-report-dd7b6.firebasestorage.app",
-      messagingSenderId: "382347372681",
-      appId: "1:382347372681:web:0703b9ddfec327cc683e58",
-      databaseURL: "https://production-report-dd7b6-default-rtdb.firebaseio.com"
-    };
+    <!-- Stock In Modal WITH SEARCH FILTER -->
+    <div id="stockInModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border">
+            <div class="bg-blue-600 text-white px-5 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-base">Stock In</h3>
+                <button onclick="closeModal('stockInModal')" class="text-white/80 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleStockTransaction(event, 'IN')" class="p-5 space-y-3.5">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Search & Select Item *</label>
+                    <input type="text" id="inSearchBox" oninput="filterDropdown('IN')" placeholder="Type Code or Name to filter..." class="w-full border border-blue-200 bg-blue-50/40 p-2.5 mb-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                    <select id="inProductSelect" required class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm" size="4"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Quantity *</label>
+                    <input type="number" id="inQty" min="1" required class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm">
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('stockInModal')" class="px-4 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg text-sm transition">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition">Add Stock</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    <!-- Stock Out Modal WITH SEARCH FILTER -->
+    <div id="stockOutModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden border">
+            <div class="bg-amber-600 text-white px-5 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-base">Stock Out</h3>
+                <button onclick="closeModal('stockOutModal')" class="text-white/80 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleStockTransaction(event, 'OUT')" class="p-5 space-y-3.5">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Search & Select Item *</label>
+                    <input type="text" id="outSearchBox" oninput="filterDropdown('OUT')" placeholder="Type Code or Name to filter..." class="w-full border border-amber-200 bg-amber-50/40 p-2.5 mb-2 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                    <select id="outProductSelect" required class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm" size="4"></select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Quantity *</label>
+                    <input type="number" id="outQty" min="1" required class="w-full border border-slate-200 bg-slate-50 p-2.5 rounded-lg text-sm">
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('stockOutModal')" class="px-4 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg text-sm transition">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-sm font-medium transition">Reduce Stock</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    const lists = {
-        "200 machine": ["65 Ltr white watar tank", "10×35 pressure vessel inarshell", "12×52 pressure vessel inarshell", "16×65 pressure vessel inarshell"],
-        "3000 machine": ["500 ltr blow green tank", "1000 ltr blow green tank", "3000 ltr blow blue tank", "1000 ltr septic tank"],
-        "315 mm pipe machin": ["50 mm pipe", "75 mm pipe", "110 mm pipe", "160 mm pipe", "315 mm pipe"],
-        "63 mm pipe machine": ["50 mm coil", "1\" coil pipe (300 feet) green", "1\" coil pipe (500 feet) green", "3/4\" coil pipe (300 feet) green", "3/4\" coil pipe (500 feet) green", "1/2\" coil pipe (500 feet) green", "1.5\" coil pipe (500 feet) green", "1.5\" coil pipe (300 feet) green", "1.25\" coil pipe (300 feet) green", "1.25\" coil pipe (500 feet) green", "3/4\" coil pipe (500 feet) black", "3/4\" coil pipe (300 feet) black", "1\" coil pipe (500 feet) black", "1.5\" coil pipe (300 feet) black"],
-        "roto": ["100 ltr white roto tank", "150 ltr white roto tank", "300 ltr white roto", "300 ltr green roto tank", "300 ltr black roto", "500 ltr chemical roto", "500 ltr green roto tank", "500 ltr green roto classic", "500 ltr black roto tank", "500 ltr black roto tank classic", "500 ltr 3 layer mosaic tank", "500 ltr 3 layer green roto tank", "750 ltr green roto tank", "750 ltr green roto tank classic", "750 ltr black roto tank", "750 ltr black roto tank classic", "750 ltr 3 layer mosaic tank", "750 3 layer green mosaic water tank", "1000 ltr chemical roto tank", "1000 ltr green roto tank", "1000 ltr green roto tank classic", "1000 ltr black roto tank", "1000 ltr black roto tank classic", "1000 ltr 3 layer green roto tank", "1000 ltr 3 layer mosaic water tank", "1500 chemical roto tank", "1500 ltr green roto tank", "1500 ltr black roto tank", "1500 ltr 3 layer mosaic water tank", "2000 ltr chemical tank", "2000 ltr black roto tank", "2000 ltr 3 layer green roto tank", "2000 ltr 3 layer musaic tank", "2000 ltr green roto tank", "3000 ltr green roto tank", "3000 ltr black roto tank", "5000 ltr black roto tank", "10000 ltr black roto tank"]
-    };
+    <!-- Bulk Stock Out Modal -->
+    <div id="bulkStockOutModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden border">
+            <div class="bg-purple-700 text-white px-5 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-base"><i class="fa-solid fa-list-check mr-1"></i> Bulk Stock Out (Multiple Items)</h3>
+                <button onclick="closeModal('bulkStockOutModal')" class="text-white/80 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleBulkStockOut(event)" class="p-5 space-y-4">
+                <p class="text-xs text-slate-500">Select multiple items and their respective quantities to reduce stock in one go.</p>
+                <div id="bulkItemsContainer" class="space-y-3 max-h-60 overflow-y-auto pr-1"></div>
+                <button type="button" onclick="addBulkRow()" class="text-xs bg-slate-100 hover:bg-slate-200 text-purple-700 font-semibold px-3 py-2 rounded-lg border border-purple-200 flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-plus"></i> Add Another Item
+                </button>
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('bulkStockOutModal')" class="px-4 py-2 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded-lg text-sm transition">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition">Process Bulk Stock Out</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
-    function switchTab(id, el) {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        el.classList.add('active');
-    }
+    <!-- JavaScript Logic -->
+    <script>
+        const defaultProducts = [
+            { code: 'PIPE-1001', name: 'HDPE Pipe 110mm (PN10)', category: 'Pipe', unit: 'Meter', qty: 120, minQty: 20 },
+            { code: 'FIT-1001', name: 'HDPE Elbow 110mm', category: 'Fitting', unit: 'PCS', qty: 50, minQty: 10 },
+            { code: 'TANK-1001', name: '1000L Water Tank (3 Layer)', category: 'Tank', unit: 'PCS', qty: 15, minQty: 3 },
+            { code: 'VESSEL-1001', name: 'FRP Pressure Vessel 1054', category: 'Vessel', unit: 'PCS', qty: 8, minQty: 2 }
+        ];
 
-    function loadItems() {
-        const m = document.getElementById('entryMachine').value;
-        const sub = document.getElementById('entryItem');
-        sub.innerHTML = '';
-        let list = (m.includes("roto") || (m.includes("000") && m !== "3000 machine")) ? lists.roto : lists[m];
-        if(list) { 
-            list.forEach(x => sub.innerHTML += `<option value="${x}">${x}</option>`); 
-            document.getElementById('entryFields').style.display='block';
-            document.getElementById('prodDate').valueAsDate = new Date();
+        let products = JSON.parse(localStorage.getItem('erp_products')) || defaultProducts;
+        let productionLogs = JSON.parse(localStorage.getItem('erp_prod_logs')) || [];
+
+        function saveData() {
+            localStorage.setItem('erp_products', JSON.stringify(products));
+            localStorage.setItem('erp_prod_logs', JSON.stringify(productionLogs));
         }
-    }
 
-    function updateReportItems() {
-        const m = document.getElementById('repMachine').value;
-        const sub = document.getElementById('repItem');
-        sub.innerHTML = '<option value="ALL">All Items</option>';
-        if(m !== "ALL") {
-            let list = (m.includes("roto") || (m.includes("000") && m !== "3000 machine")) ? lists.roto : lists[m];
-            if(list) list.forEach(x => sub.innerHTML += `<option value="${x}">${x}</option>`);
+        function updateClock() {
+            document.getElementById('liveClock').innerText = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'medium' });
         }
-    }
+        setInterval(updateClock, 1000);
+        updateClock();
+        document.getElementById('year').innerText = new Date().getFullYear();
 
-    function submitEntry() {
-        const selectedDate = new Date(document.getElementById('prodDate').value);
-        const formattedDate = selectedDate.toLocaleDateString('en-GB');
-        const d = { 
-            machine: document.getElementById('entryMachine').value, 
-            shift: document.getElementById('prodShift').value,
-            item: document.getElementById('entryItem').value, 
-            qty: parseInt(document.getElementById('prodQty').value)||0, 
-            reject: parseInt(document.getElementById('rejectQty').value)||0, 
-            remarks: document.getElementById('remarks').value||"-", 
-            date: formattedDate 
-        };
-        db.ref('production_logs').push(d).then(() => { alert("Saved!"); location.reload(); });
-    }
+        function autoGenerateCode() {
+            const type = document.getElementById('pType').value;
+            let prefix = 'PIPE-';
+            if (type === 'Fitting') prefix = 'FIT-';
+            else if (type === 'Tank') prefix = 'TANK-';
+            else if (type === 'Vessel') prefix = 'VESSEL-';
 
-    function fetchReport() {
-        const m = document.getElementById('repMachine').value;
-        const itm = document.getElementById('repItem').value;
-        const s = document.getElementById('sDate').value;
-        const e = document.getElementById('eDate').value;
-        document.getElementById('reportBox').style.display = 'block';
-
-        document.getElementById('pdfMachineName').innerText = m;
-        document.getElementById('pdfItemName').innerText = itm;
-        document.getElementById('pdfDateRange').innerText = (s || 'Start') + " to " + (e || 'End');
-        document.getElementById('pdfGenTime').innerText = new Date().toLocaleString();
-
-        db.ref('production_logs').once('value', snap => {
-            let records = [];
-            snap.forEach(c => {
-                const v = c.val();
-                const dP = v.date.split('/');
-                const rD = new Date(`${dP[2]}-${dP[1]}-${dP[0]}`); // YYYY-MM-DD
-                const matchMachine = (m === "ALL" || v.machine === m);
-                const matchItem = (itm === "ALL" || v.item === itm);
-                const matchDate = (!s || rD >= new Date(s)) && (!e || rD <= new Date(e));
-                
-                if(matchMachine && matchItem && matchDate) {
-                    records.push({...v, timestamp: rD.getTime()});
-                }
+            const matchingItems = products.filter(p => p.code.startsWith(prefix));
+            let maxNum = 1000;
+            matchingItems.forEach(p => {
+                const numPart = parseInt(p.code.replace(prefix, ''));
+                if (!isNaN(numPart) && numPart > maxNum) maxNum = numPart;
             });
+            document.getElementById('pCode').value = prefix + (maxNum + 1);
+        }
 
-            // তারিখ অনুযায়ী সিরিয়াল করা (Soring by Date)
-            records.sort((a, b) => a.timestamp - b.timestamp);
-
-            let h = "", tQty = 0, tRej = 0, sl = 1;
-            records.forEach(v => {
-                h += `<tr><td>${sl++}</td><td>${v.date}</td><td>${v.shift || '-'}</td><td style="text-align:left">${v.item}</td><td>${v.qty}</td><td>${v.reject}</td><td>${v.remarks}</td></tr>`;
-                tQty += v.qty; tRej += v.reject;
+        function switchTab(tab) {
+            ['dashboard', 'inventory', 'production', 'reports'].forEach(t => {
+                document.getElementById('sec-' + t).classList.add('hidden');
+                const btn = document.getElementById('tab-' + t);
+                btn.className = "px-5 py-3.5 border-b-2 border-transparent text-slate-600 hover:text-emerald-600 flex items-center gap-2 whitespace-nowrap transition";
             });
-
-            document.getElementById('reportData').innerHTML = h;
-            document.getElementById('reportTotal').innerHTML = `<tr class="total-row"><td colspan="4">GRAND TOTAL</td><td>${tQty}</td><td>${tRej}</td><td>-</td></tr>`;
-            document.getElementById('pdfBtn').style.display = 'inline-flex';
-        });
-    }
-
-    function loadModTable() {
-        const m = document.getElementById('modMac').value;
-        db.ref('production_logs').once('value', snap => {
-            let records = [];
-            snap.forEach(c => {
-                const v = c.val();
-                if(v.machine === m) {
-                    const dP = v.date.split('/');
-                    const rD = new Date(`${dP[2]}-${dP[1]}-${dP[0]}`);
-                    records.push({...v, key: c.key, timestamp: rD.getTime()});
-                }
-            });
+            document.getElementById('sec-' + tab).classList.remove('hidden');
+            const activeBtn = document.getElementById('tab-' + tab);
+            activeBtn.className = "px-5 py-3.5 border-b-2 border-emerald-600 text-emerald-700 flex items-center gap-2 whitespace-nowrap transition";
             
-            records.sort((a, b) => a.timestamp - b.timestamp);
+            if(tab === 'production') renderProductionDropdowns();
+        }
 
-            let h = "";
-            records.forEach(v => {
-                h += `<tr><td>${v.date}</td><td>${v.shift || 'Day'}</td><td>${v.item}</td><td>${v.qty}</td><td><button class="btn btn-warning" onclick="openMod('${v.key}',${v.qty},${v.reject},'${v.date}','${v.remarks}','${v.shift || 'Day'}')">Modify</button></td></tr>`;
+        function switchProdSub(sub) {
+            ['pipe', 'fittings', 'tank', 'vessel'].forEach(s => {
+                document.getElementById('prodsub-' + s).classList.add('hidden');
+                document.getElementById('subtab-' + s).className = 'px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-semibold whitespace-nowrap transition';
             });
-            document.getElementById('modData').innerHTML = h;
-        });
-    }
+            document.getElementById('prodsub-' + sub).classList.remove('hidden');
+            let activeColor = 'bg-blue-600 text-white';
+            if(sub === 'fittings') activeColor = 'bg-indigo-600 text-white';
+            if(sub === 'tank') activeColor = 'bg-emerald-600 text-white';
+            if(sub === 'vessel') activeColor = 'bg-amber-600 text-white';
+            document.getElementById('subtab-' + sub).className = `px-4 py-2 ${activeColor} rounded-lg text-sm font-semibold whitespace-nowrap transition`;
+        }
 
-    function openMod(k,q,r,d,rem,sh) {
-        document.getElementById('editBox').style.display='block';
-        document.getElementById('key').value=k; 
-        document.getElementById('mQty').value=q; 
-        document.getElementById('mRej').value=r; 
-        document.getElementById('mDate').value=d; 
-        document.getElementById('mRem').value=rem;
-        document.getElementById('mShift').value=sh;
-    }
+        function renderProductionDropdowns() {
+            document.getElementById('pipeOutputItem').innerHTML = products.filter(p => p.category === 'Pipe').map(p => `<option value="${p.code}">[${p.code}] ${p.name} (Stock: ${p.qty} ${p.unit})</option>`).join('');
+            document.getElementById('fittingOutputItem').innerHTML = products.filter(p => p.category === 'Fitting').map(p => `<option value="${p.code}">[${p.code}] ${p.name} (Stock: ${p.qty} ${p.unit})</option>`).join('');
+            document.getElementById('tankOutputItem').innerHTML = products.filter(p => p.category === 'Tank').map(p => `<option value="${p.code}">[${p.code}] ${p.name} (Stock: ${p.qty} ${p.unit})</option>`).join('');
+            document.getElementById('vesselOutputItem').innerHTML = products.filter(p => p.category === 'Vessel').map(p => `<option value="${p.code}">[${p.code}] ${p.name} (Stock: ${p.qty} ${p.unit})</option>`).join('');
+            renderProductionLogs();
+        }
 
-    function updateNow() {
-        db.ref('production_logs/'+document.getElementById('key').value).update({ 
-            qty: parseInt(document.getElementById('mQty').value), 
-            reject: parseInt(document.getElementById('mRej').value), 
-            date: document.getElementById('mDate').value, 
-            remarks: document.getElementById('mRem').value,
-            shift: document.getElementById('mShift').value
-        }).then(() => { alert("Updated"); loadModTable(); document.getElementById('editBox').style.display='none'; });
-    }
+        function handleSpecialProduction(event, type) {
+            event.preventDefault();
+            let outCode = document.getElementById(type.toLowerCase() + 'OutputItem').value;
+            let outQty = parseInt(document.getElementById(type.toLowerCase() + 'OutputQty').value);
+            let note = document.getElementById(type.toLowerCase() + 'Note').value;
 
-    function makePDF() {
-        const element = document.getElementById('pdfContent');
-        const opt = { 
-            margin: [10, 10, 10, 10], 
-            filename: 'WBL_Production_Report.pdf', 
-            html2canvas: { scale: 2, useCORS: true }, 
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' } 
-        };
-        html2pdf().set(opt).from(element).save();
-    }
+            const outItem = products.find(p => p.code === outCode);
+            if (!outItem) { alert('Item not found!'); return; }
 
-    let n = 0; const txt = "WATER BIRDS PRODUCTION MANAGEMENT SYSTEM";
-    function type() { if(n < txt.length){ document.getElementById("typewriter").innerHTML += txt.charAt(n); n++; setTimeout(type, 100); } }
-    window.onload = type;
-</script>
+            outItem.qty += outQty;
+            productionLogs.push({
+                date: new Date().toLocaleDateString('en-US'),
+                category: type,
+                productName: `[${outItem.code}] ${outItem.name}`,
+                qty: `${outQty} ${outItem.unit}`,
+                note: note || '-'
+            });
+
+            saveData();
+            renderProductionDropdowns();
+            renderTable();
+            alert(`${type} Production completed successfully!`);
+            event.target.reset();
+        }
+
+        function handleFittingProduction(event) {
+            event.preventDefault();
+            let outCode = document.getElementById('fittingOutputItem').value;
+            let outQty = parseInt(document.getElementById('fittingOutputQty').value);
+            let note = document.getElementById('fittingNote').value;
+
+            const fittingItem = products.find(p => p.code === outCode);
+            if (!fittingItem) { alert('Fitting item not found!'); return; }
+
+            fittingItem.qty += outQty;
+            productionLogs.push({
+                date: new Date().toLocaleDateString('en-US'),
+                category: 'Pipe Fittings',
+                productName: `[${fittingItem.code}] ${fittingItem.name}`,
+                qty: `${outQty} ${fittingItem.unit}`,
+                note: note || '-'
+            });
+
+            saveData();
+            renderProductionDropdowns();
+            renderTable();
+            alert('Pipe Fittings Production completed successfully!');
+            event.target.reset();
+        }
+
+        function renderProductionLogs() {
+            const tbody = document.getElementById('productionLogTable');
+            tbody.innerHTML = productionLogs.slice(-10).reverse().map(l => `
+                <tr>
+                    <td class="p-3 text-xs text-slate-500">${l.date}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-bold ${l.category==='Pipe Fittings'?'bg-indigo-100 text-indigo-700':'bg-blue-100 text-blue-700'}">${l.category}</span></td>
+                    <td class="p-3 font-medium text-slate-700">${l.productName}</td>
+                    <td class="p-3 text-center font-bold text-emerald-600">+${l.qty}</td>
+                    <td class="p-3 text-xs text-slate-500">${l.note}</td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" class="p-4 text-center text-slate-400">No production logs found</td></tr>';
+        }
+
+        function searchReport() {
+            const selectedCat = document.getElementById('reportCategorySelect').value;
+            const container = document.getElementById('reportResultContainer');
+            const tbody = document.getElementById('repSearchResultTable');
+            const tfoot = document.getElementById('repSearchTableFoot');
+
+            if(!selectedCat) {
+                alert('Please select a category first!');
+                container.classList.add('hidden');
+                return;
+            }
+
+            const filteredItems = products.filter(p => p.category === selectedCat);
+            tbody.innerHTML = '';
+            tfoot.innerHTML = '';
+
+            if(filteredItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">No products found under this category</td></tr>';
+            } else {
+                let totalQty = 0;
+                let unitName = '';
+                filteredItems.forEach((p, idx) => {
+                    totalQty += p.qty;
+                    unitName = p.unit;
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50">
+                            <td class="p-3 border-b text-center font-medium text-slate-500">${idx + 1}</td>
+                            <td class="p-3 border-b font-medium text-slate-800">${p.name}</td>
+                            <td class="p-3 border-b text-slate-600">${p.category}</td>
+                            <td class="p-3 border-b text-center font-bold text-emerald-700">${p.qty} ${p.unit}</td>
+                        </tr>
+                    `;
+                });
+
+                tfoot.innerHTML = `
+                    <tr class="bg-emerald-50 font-bold text-slate-800">
+                        <td colspan="3" class="p-3 border-t-2 border-emerald-800 text-right">Total Stock Qty:</td>
+                        <td class="p-3 border-t-2 border-emerald-800 text-center text-emerald-800 text-base">${totalQty} ${unitName}</td>
+                    </tr>
+                `;
+            }
+
+            document.getElementById('reportTitleBadge').innerText = selectedCat + ' Stock Report';
+            document.getElementById('reportGeneratedDate').innerText = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+            container.classList.remove('hidden');
+        }
+
+        function downloadPDF() {
+            window.print();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('inventoryTableBody');
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const catFilter = document.getElementById('categoryFilter').value;
+            tbody.innerHTML = '';
+
+            products.forEach((p, index) => {
+                if ((p.name.toLowerCase().includes(search) || p.code.toLowerCase().includes(search)) && (!catFilter || p.category === catFilter)) {
+                    let badgeColor = p.category === 'Pipe' ? 'bg-blue-100 text-blue-700' : p.category === 'Fitting' ? 'bg-indigo-100 text-indigo-700' : p.category === 'Tank' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700';
+                    tbody.innerHTML += `
+                        <tr class="${p.qty <= p.minQty ? 'bg-red-50' : 'hover:bg-slate-50'} transition">
+                            <td class="p-3.5 font-semibold text-slate-700">${p.code}</td>
+                            <td class="p-3.5 font-medium text-slate-900">${p.name}</td>
+                            <td class="p-3.5"><span class="px-2.5 py-1 rounded text-xs font-bold ${badgeColor}">${p.category}</span></td>
+                            <td class="p-3.5 text-slate-600">${p.unit}</td>
+                            <td class="p-3.5 text-center font-bold ${p.qty <= p.minQty ? 'text-red-600' : 'text-slate-800'}">${p.qty}</td>
+                            <td class="p-3.5 text-center no-print">
+                                <button onclick="deleteProduct(${index})" class="text-slate-400 hover:text-red-600 transition"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+            updateDropdowns();
+        }
+
+        function updateDropdowns() {
+            const cats = [...new Set(products.map(p => p.category))];
+            const catSelect = document.getElementById('categoryFilter');
+            const curVal = catSelect.value;
+            catSelect.innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+            catSelect.value = curVal;
+
+            filterDropdown('IN');
+            filterDropdown('OUT');
+        }
+
+        function filterDropdown(type) {
+            const searchVal = document.getElementById(type === 'IN' ? 'inSearchBox' : 'outSearchBox').value.toLowerCase();
+            const selectElem = document.getElementById(type === 'IN' ? 'inProductSelect' : 'outProductSelect');
+            
+            const filtered = products.filter(p => p.code.toLowerCase().includes(searchVal) || p.name.toLowerCase().includes(searchVal));
+            
+            selectElem.innerHTML = filtered.map(p => `<option value="${p.code}">[${p.code}] ${p.name} (${p.qty} ${p.unit})</option>`).join('');
+            if(filtered.length > 0) selectElem.selectedIndex = 0;
+        }
+
+        function addBulkRow() {
+            const container = document.getElementById('bulkItemsContainer');
+            let allOpts = products.map(p => `<option value="${p.code}">[${p.code}] ${p.name} (Stock: ${p.qty} ${p.unit})</option>`).join('');
+            
+            const rowDiv = document.createElement('div');
+            rowDiv.className = 'flex items-center gap-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200';
+            rowDiv.innerHTML = `
+                <select class="bulk-item-select w-2/3 border border-slate-200 bg-white p-2 rounded text-xs">${allOpts}</select>
+                <input type="number" min="1" placeholder="Qty" class="bulk-qty-input w-1/4 border border-slate-200 bg-white p-2 rounded text-xs" required>
+                <button type="button" onclick="this.parentElement.remove()" class="text-slate-400 hover:text-red-600 px-1"><i class="fa-solid fa-trash text-xs"></i></button>
+            `;
+            container.appendChild(rowDiv);
+        }
+
+        function handleBulkStockOut(event) {
+            event.preventDefault();
+            const selects = document.querySelectorAll('.bulk-item-select');
+            const qtys = document.querySelectorAll('.bulk-qty-input');
+
+            if (selects.length === 0) {
+                alert('Please add at least one item!');
+                return;
+            }
+
+            let updates = [];
+            for (let i = 0; i < selects.length; i++) {
+                let code = selects[i].value;
+                let qty = parseInt(qtys[i].value);
+                let item = products.find(p => p.code === code);
+
+                if (!item) continue;
+                if (item.qty < qty) {
+                    alert(`Insufficient stock for ${item.name}! Available: ${item.qty}`);
+                    return;
+                }
+                updates.push({ item, qty });
+            }
+
+            updates.forEach(u => {
+                u.item.qty -= u.qty;
+            });
+
+            saveData();
+            renderTable();
+            closeModal('bulkStockOutModal');
+            alert('Bulk Stock Out processed successfully!');
+        }
+
+        function openModal(id) { 
+            document.getElementById(id).classList.remove('hidden'); 
+            document.getElementById(id).classList.add('flex'); 
+            if(id==='addModal') autoGenerateCode();
+            if(id==='stockInModal') {
+                document.getElementById('inSearchBox').value = '';
+                filterDropdown('IN');
+            }
+            if(id==='stockOutModal') {
+                document.getElementById('outSearchBox').value = '';
+                filterDropdown('OUT');
+            }
+            if(id==='bulkStockOutModal') {
+                document.getElementById('bulkItemsContainer').innerHTML = '';
+                addBulkRow();
+            }
+        }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+
+        function handleAddProduct(event) {
+            event.preventDefault();
+            products.push({
+                category: document.getElementById('pType').value,
+                code: document.getElementById('pCode').value.trim(),
+                name: document.getElementById('pName').value.trim(),
+                unit: document.getElementById('pUnit').value.trim(),
+                qty: parseInt(document.getElementById('pQty').value) || 0,
+                minQty: 5
+            });
+            saveData();
+            renderTable();
+            closeModal('addModal');
+            event.target.reset();
+        }
+
+        function handleStockTransaction(event, type) {
+            event.preventDefault();
+            const code = document.getElementById(type === 'IN' ? 'inProductSelect' : 'outProductSelect').value;
+            const qty = parseInt(document.getElementById(type === 'IN' ? 'inQty' : 'outQty').value);
+            const item = products.find(p => p.code === code);
+            
+            if (!item) { alert('Please select an item!'); return; }
+            if (type === 'OUT' && item.qty < qty) { alert('Out of stock!'); return; }
+            if (type === 'IN') item.qty += qty; else item.qty -= qty;
+
+            saveData();
+            renderTable();
+            closeModal(type === 'IN' ? 'stockInModal' : 'stockOutModal');
+            alert('Stock updated successfully!');
+        }
+
+        function deleteProduct(index) {
+            if (confirm('Delete this item?')) { products.splice(index, 1); saveData(); renderTable(); }
+        }
+
+        saveData();
+        renderTable();
+    </script>
 </body>
 </html>
