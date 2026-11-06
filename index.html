@@ -12,7 +12,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-        import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, set, get, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyAyPB9AhVdpQyf-haCIajQY_2rqmMqMgCw",
@@ -29,12 +29,13 @@
         const analytics = getAnalytics(app);
         const db = getDatabase(app);
 
-        // Expose Firebase DB to global scope for ERP sync if needed
+        // Expose Firebase DB & methods to global scope for ERP sync
         window.firebaseDB = db;
         window.firebaseRef = ref;
         window.firebaseSet = set;
         window.firebaseGet = get;
         window.firebaseOnValue = onValue;
+        window.firebaseRemove = remove;
     </script>
 
     <style>
@@ -509,7 +510,7 @@
     function initSystem() {
         ERP.load();
         
-        // Setup Realtime Firebase listener if available
+        // Setup Realtime Firebase listener & sync
         setTimeout(() => {
             if(window.firebaseDB && window.firebaseRef && window.firebaseOnValue) {
                 window.firebaseOnValue(window.firebaseRef(window.firebaseDB, 'erp_data'), (snapshot) => {
