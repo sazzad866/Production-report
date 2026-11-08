@@ -36,6 +36,9 @@
         window.firebaseGet = get;
         window.firebaseOnValue = onValue;
         window.firebaseRemove = remove;
+
+        // Trigger initial cloud sync check on load
+        window.dispatchEvent(new Event('firebase-ready'));
     </script>
 
     <style>
@@ -478,8 +481,10 @@
     let ERP = {
         data: EMPTY_ERP_DATA,
         save() {
+            // Save to localStorage immediately
             localStorage.setItem('membrane_erp_data', JSON.stringify(this.data));
-            // Sync with Firebase Realtime Database
+            
+            // Sync with Firebase Realtime Database safely
             if(window.firebaseDB && window.firebaseRef && window.firebaseSet) {
                 window.firebaseSet(window.firebaseRef(window.firebaseDB, 'erp_data'), this.data).catch(err => {
                     console.error("Firebase Sync Error:", err);
@@ -489,42 +494,73 @@
         load() {
             const saved = localStorage.getItem('membrane_erp_data');
             if(saved) {
-                ERP.data = JSON.parse(saved);
-                if(!ERP.data.categories) ERP.data.categories = {};
-                if(!ERP.data.productCodes) ERP.data.productCodes = {};
-                if(!ERP.data.productStocks) ERP.data.productStocks = {};
-                if(!ERP.data.productWastages) ERP.data.productWastages = {};
-                if(!ERP.data.rawCodes) ERP.data.rawCodes = {};
-                if(!ERP.data.rawMaterials) ERP.data.rawMaterials = {};
-                if(!ERP.data.rawStocks) ERP.data.rawStocks = {};
-                if(!ERP.data.recipes) ERP.data.recipes = {};
-                if(!ERP.data.deliveries) ERP.data.deliveries = [];
-                if(!ERP.data.history) ERP.data.history = [];
-                if(!ERP.data.wastageHistory) ERP.data.wastageHistory = [];
+                try {
+                    ERP.data = JSON.parse(saved);
+                } catch(e) {
+                    ERP.data = JSON.parse(JSON.stringify(EMPTY_ERP_DATA));
+                }
             } else {
                 ERP.data = JSON.parse(JSON.stringify(EMPTY_ERP_DATA));
             }
+            // Ensure schema integrity
+            if(!ERP.data.categories) ERP.data.categories = {};
+            if(!ERP.data.productCodes) ERP.data.productCodes = {};
+            if(!ERP.data.productStocks) ERP.data.productStocks = {};
+            if(!ERP.data.productWastages) ERP.data.productWastages = {};
+            if(!ERP.data.rawCodes) ERP.data.rawCodes = {};
+            if(!ERP.data.rawMaterials) ERP.data.rawMaterials = {};
+            if(!ERP.data.rawStocks) ERP.data.rawStocks = {};
+            if(!ERP.data.recipes) ERP.data.recipes = {};
+            if(!ERP.data.deliveries) ERP.data.deliveries = [];
+            if(!ERP.data.history) ERP.data.history = [];
+            if(!ERP.data.wastageHistory) ERP.data.wastageHistory = [];
         }
     };
 
     function initSystem() {
         ERP.load();
-        
-        // Setup Realtime Firebase listener & sync
+        refreshUI();
+
+        // Listen to Firebase Realtime Database updates and sync securely
+        window.addEventListener('firebase-ready', () => {
+            setupFirebaseListener();
+        });
+
+        // Backup check if window event already fired
         setTimeout(() => {
-            if(window.firebaseDB && window.firebaseRef && window.firebaseOnValue) {
-                window.firebaseOnValue(window.firebaseRef(window.firebaseDB, 'erp_data'), (snapshot) => {
+            setupFirebaseListener();
+        }, 500);
+    }
+
+    function setupFirebaseListener() {
+        if(window.firebaseDB && window.firebaseRef && window.firebaseGet && window.firebaseOnValue) {
+            const dbRef = window.firebaseRef(window.firebaseDB, 'erp_data');
+            
+            // First fetch existing cloud data to ensure we don't lose anything
+            window.firebaseGet(dbRef).then((snapshot) => {
+                if (snapshot.exists()) {
                     const serverData = snapshot.val();
-                    if(serverData) {
+                    if(serverData && Object.keys(serverData).length > 0) {
                         ERP.data = serverData;
                         localStorage.setItem('membrane_erp_data', JSON.stringify(ERP.data));
                         refreshUI();
                     }
-                });
-            }
-        }, 1000);
+                } else {
+                    // If cloud is empty, push local data up
+                    window.firebaseSet(dbRef, ERP.data).catch(err => console.error("Initial push error:", err));
+                }
+            }).catch(err => console.error("Firebase get error:", err));
 
-        refreshUI();
+            // Real-time listener for updates across sessions/refreshes
+            window.firebaseOnValue(dbRef, (snapshot) => {
+                const serverData = snapshot.val();
+                if(serverData && Object.keys(serverData).length > 0) {
+                    ERP.data = serverData;
+                    localStorage.setItem('membrane_erp_data', JSON.stringify(ERP.data));
+                    refreshUI();
+                }
+            });
+        }
     }
 
     function openTab(evt, tabId) {
